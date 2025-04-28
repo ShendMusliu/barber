@@ -1,0 +1,136 @@
+import { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from 'date-fns';
+import { motion } from 'framer-motion';
+
+export default function BarberBookingForm() {
+  const [customerName, setCustomerName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [service, setService] = useState('');
+  const [barber, setBarber] = useState('');
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [timeSlot, setTimeSlot] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+
+  const services = ['Haircut', 'Shave', 'Beard Trim', 'Hair Color'];
+  const barbers = ['John', 'Mike', 'Luis', 'Sara'];
+  const slots = ['09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM', '05:00 PM'];
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: send booking data to backend or API
+    setSubmitted(true);
+  };
+
+  if (submitted) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="p-6 max-w-md mx-auto bg-white rounded-2xl shadow-lg"
+      >
+        <h2 className="text-2xl font-bold mb-4">Booking Confirmed!</h2>
+        <p>Thank you, {customerName}! Your {service.toLowerCase()} with {barber} is scheduled for {format(date!, 'MMMM dd, yyyy')} at {timeSlot}.</p>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.form
+      onSubmit={handleSubmit}
+      initial={{ scale: 0.9, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="p-6 max-w-lg mx-auto bg-white rounded-2xl shadow-lg space-y-6"
+    >
+      <h1 className="text-3xl font-extrabold text-center">Book Your Appointment</h1>
+
+      <div>
+        <Label htmlFor="name">Full Name</Label>
+        <Input
+          id="name"
+          value={customerName}
+          onChange={(e) => setCustomerName(e.target.value)}
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="phone">Phone Number</Label>
+        <Input
+          id="phone"
+          type="tel"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="service">Service</Label>
+        <Select onValueChange={setService} value={service} required>
+          <SelectTrigger id="service" className="w-full">
+            <SelectValue placeholder="Select a service" />
+          </SelectTrigger>
+          <SelectContent>
+            {services.map((s) => (
+              <SelectItem key={s} value={s}>{s}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label htmlFor="barber">Preferred Barber</Label>
+        <Select onValueChange={setBarber} value={barber} required>
+          <SelectTrigger id="barber" className="w-full">
+            <SelectValue placeholder="Choose a barber" />
+          </SelectTrigger>
+          <SelectContent>
+            {barbers.map((b) => (
+              <SelectItem key={b} value={b}>{b}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex space-x-4">
+        <div className="flex-1">
+          <Label>Date</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-full justify-start">
+                {date ? format(date, 'PPP') : 'Pick a date'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent>
+              <Calendar mode="single" selected={date} onSelect={setDate} />
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        <div className="flex-1">
+          <Label htmlFor="time">Time Slot</Label>
+          <Select onValueChange={setTimeSlot} value={timeSlot} required>
+            <SelectTrigger id="time" className="w-full">
+              <SelectValue placeholder="Select a time" />
+            </SelectTrigger>
+            <SelectContent>
+              {slots.map((slot) => (
+                <SelectItem key={slot} value={slot}>{slot}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <Button type="submit" className="w-full">Confirm Appointment</Button>
+    </motion.form>
+  );
+}
